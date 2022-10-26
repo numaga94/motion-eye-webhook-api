@@ -21,13 +21,42 @@ func main() {
 
 	// ~ load env
 	godotenv.Load()
+	var (
+		port         string
+		snapshot_url string
+		token        string
+		chat_id      string
+	)
+	if os.Getenv("PORT") == "" {
+		port = os.Args[0]
+	} else {
+		port = os.Getenv("PORT")
+	}
+
+	if os.Getenv("SNAPSHOT_URL") == "" {
+		snapshot_url = os.Args[1]
+	} else {
+		snapshot_url = os.Getenv("SNAPSHOT_URL")
+	}
+
+	if os.Getenv("TOKEN") == "" {
+		token = os.Args[2]
+	} else {
+		token = os.Getenv("TOKEN")
+	}
+
+	if os.Getenv("CHAT_ID") == "" {
+		chat_id = os.Args[3]
+	} else {
+		chat_id = os.Getenv("CHAT_ID")
+	}
 
 	// ~ Default middleware config
 	app.Use(logger.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		// get current photo
-		reqSnapshot, _ := http.NewRequest("GET", os.Getenv("SNAPSHOT_URL"), nil)
+		reqSnapshot, _ := http.NewRequest("GET", snapshot_url, nil)
 
 		reqSnapshot.Header.Add("cookie", "motion_detected_1=false; monitor_info_1=; capture_fps_1=0.0")
 
@@ -42,7 +71,7 @@ func main() {
 		// send current photo to telegram
 		// https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
-			"chat_id": strings.NewReader(os.Getenv("CHAT_ID")),
+			"chat_id": strings.NewReader(chat_id),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
 			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。", time.Now().Format(time.RFC3339))),
 		}
@@ -79,7 +108,7 @@ func main() {
 		// If you don't close it, your request will be missing the terminating boundary.
 		w.Close()
 
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", os.Getenv("TOKEN"))
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", token)
 
 		req, _ := http.NewRequest("POST", url, &b)
 
@@ -97,5 +126,5 @@ func main() {
 		return c.JSON(body)
 	})
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%v", os.Getenv("PORT"))))
+	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
 }
