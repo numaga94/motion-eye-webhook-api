@@ -28,25 +28,25 @@ func main() {
 		chat_id      string
 	)
 	if os.Getenv("PORT") == "" {
-		port = os.Args[0]
+		port = os.Args[1]
 	} else {
 		port = os.Getenv("PORT")
 	}
 
 	if os.Getenv("SNAPSHOT_URL") == "" {
-		snapshot_url = os.Args[1]
+		snapshot_url = os.Args[2]
 	} else {
 		snapshot_url = os.Getenv("SNAPSHOT_URL")
 	}
 
 	if os.Getenv("TOKEN") == "" {
-		token = os.Args[2]
+		token = os.Args[3]
 	} else {
 		token = os.Getenv("TOKEN")
 	}
 
 	if os.Getenv("CHAT_ID") == "" {
-		chat_id = os.Args[3]
+		chat_id = os.Args[4]
 	} else {
 		chat_id = os.Getenv("CHAT_ID")
 	}
