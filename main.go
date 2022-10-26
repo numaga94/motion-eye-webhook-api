@@ -117,7 +117,7 @@ func main() {
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Println(err.Error())
+			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
 		}
 
 		defer res.Body.Close()
