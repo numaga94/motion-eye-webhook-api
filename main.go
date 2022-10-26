@@ -27,7 +27,7 @@ func main() {
 		token        string
 		chat_id      string
 	)
-	fmt.Println(os.Args)
+
 	if os.Getenv("PORT") == "" {
 		port = os.Args[1]
 	} else {
