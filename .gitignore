@@ -16,3 +16,6 @@
 
 # env file
 *.env
+
+# air tmp folder
+tmp/
