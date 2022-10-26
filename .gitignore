@@ -18,4 +18,4 @@
 *.env
 
 # air tmp folder
-tmp/
+*tmp/
