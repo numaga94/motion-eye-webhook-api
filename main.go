@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -31,11 +30,13 @@ func main() {
 		resSnapshot, _ := http.DefaultClient.Do(reqSnapshot)
 
 		defer resSnapshot.Body.Close()
-		bodySnapshot, _ := ioutil.ReadAll(resSnapshot.Body)
+		bodySnapshot, _ := io.ReadAll(resSnapshot.Body)
 
 		// fmt.Println(resSnapshot)
 		// fmt.Println(string(bodySnapshot))
 
+		// send current photo to telegram
+		// https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(os.Getenv("CHAT_ID")),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
@@ -86,7 +87,7 @@ func main() {
 		}
 
 		defer res.Body.Close()
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 
 		// fmt.Println(string(body))
 		return c.JSON(body)
