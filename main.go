@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
@@ -20,6 +21,9 @@ func main() {
 
 	// ~ load env
 	godotenv.Load()
+
+	// ~ Default middleware config
+	app.Use(logger.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		// get current photo
