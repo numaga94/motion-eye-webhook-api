@@ -57,7 +57,7 @@ func main() {
 
 	// ~ api GET
 	app.Get("/", func(c *fiber.Ctx) error {
-		// get current photo
+		// ~ get current photo
 		reqSnapshot, _ := http.NewRequest("GET", snapshot_url, nil)
 
 		reqSnapshot.Header.Add("cookie", "motion_detected_1=false; monitor_info_1=; capture_fps_1=0.0")
@@ -73,8 +73,8 @@ func main() {
 		// fmt.Println(resSnapshot)
 		// fmt.Println(string(bodySnapshot))
 
-		// send current photo to telegram
-		// https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
+		// ~ send current photo to telegram
+		// * golang multipart form data references: https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chat_id),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
@@ -85,7 +85,7 @@ func main() {
 		var b bytes.Buffer
 		w := multipart.NewWriter(&b)
 
-		for key, r := range values {
+		for _, r := range values {
 			var (
 				fw  io.Writer
 				err error
@@ -93,17 +93,17 @@ func main() {
 			if x, ok := r.(io.Closer); ok {
 				defer x.Close()
 			}
-			// Add an image file
-			if key == "photo" {
-				if fw, err = w.CreateFormFile(key, "photo"); err != nil {
-					fmt.Println(err.Error())
-				}
-			} else {
-				// Add other fields
-				if fw, err = w.CreateFormField(key); err != nil {
-					fmt.Println(err.Error())
-				}
-			}
+			// // Add an image file
+			// if key == "photo" {
+			// 	if fw, err = w.CreateFormFile(key, "photo"); err != nil {
+			// 		fmt.Println(err.Error())
+			// 	}
+			// } else {
+			// 	// Add other fields
+			// 	if fw, err = w.CreateFormField(key); err != nil {
+			// 		fmt.Println(err.Error())
+			// 	}
+			// }
 			if _, err = io.Copy(fw, r); err != nil {
 				fmt.Println(err)
 			}
