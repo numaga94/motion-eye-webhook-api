@@ -19,7 +19,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	// ~ load env
+	// ~ load env for config settings
 	godotenv.Load()
 	var (
 		port         string
@@ -52,16 +52,20 @@ func main() {
 		chat_id = os.Getenv("CHAT_ID")
 	}
 
-	// ~ Default middleware config
+	// ~ Default middlewares
 	app.Use(logger.New())
 
+	// ~ api GET
 	app.Get("/", func(c *fiber.Ctx) error {
 		// get current photo
 		reqSnapshot, _ := http.NewRequest("GET", snapshot_url, nil)
 
 		reqSnapshot.Header.Add("cookie", "motion_detected_1=false; monitor_info_1=; capture_fps_1=0.0")
 
-		resSnapshot, _ := http.DefaultClient.Do(reqSnapshot)
+		resSnapshot, err := http.DefaultClient.Do(reqSnapshot)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+		}
 
 		defer resSnapshot.Body.Close()
 		bodySnapshot, _ := io.ReadAll(resSnapshot.Body)
