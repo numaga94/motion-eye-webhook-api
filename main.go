@@ -104,7 +104,7 @@ func main() {
 				}
 			}
 			if _, err = io.Copy(fw, r); err != nil {
-				fmt.Println(err)
+				fmt.Println(err.Error())
 			}
 
 		}
