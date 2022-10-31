@@ -85,7 +85,7 @@ func main() {
 		var b bytes.Buffer
 		w := multipart.NewWriter(&b)
 
-		for _, r := range values {
+		for key, r := range values {
 			var (
 				fw  io.Writer
 				err error
@@ -93,17 +93,17 @@ func main() {
 			if x, ok := r.(io.Closer); ok {
 				defer x.Close()
 			}
-			// // Add an image file
-			// if key == "photo" {
-			// 	if fw, err = w.CreateFormFile(key, "photo"); err != nil {
-			// 		fmt.Println(err.Error())
-			// 	}
-			// } else {
-			// 	// Add other fields
-			// 	if fw, err = w.CreateFormField(key); err != nil {
-			// 		fmt.Println(err.Error())
-			// 	}
-			// }
+			// Add an image file
+			if key == "photo" {
+				if fw, err = w.CreateFormFile(key, "photo"); err != nil {
+					fmt.Println(err.Error())
+				}
+			} else {
+				// Add other fields
+				if fw, err = w.CreateFormField(key); err != nil {
+					fmt.Println(err.Error())
+				}
+			}
 			if _, err = io.Copy(fw, r); err != nil {
 				fmt.Println(err)
 			}
