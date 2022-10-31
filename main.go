@@ -19,7 +19,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	// ~ load env for config settings
+	// ~ Load env for config settings
 	godotenv.Load()
 	var (
 		port         string
@@ -57,7 +57,7 @@ func main() {
 
 	// ~ api GET
 	app.Get("/", func(c *fiber.Ctx) error {
-		// ~ get current photo
+		// * get current photo
 		reqSnapshot, _ := http.NewRequest("GET", snapshot_url, nil)
 
 		reqSnapshot.Header.Add("cookie", "motion_detected_1=false; monitor_info_1=; capture_fps_1=0.0")
@@ -73,7 +73,7 @@ func main() {
 		// fmt.Println(resSnapshot)
 		// fmt.Println(string(bodySnapshot))
 
-		// ~ Prepare multipart form data from snapshot response
+		// * Prepare multipart form data from snapshot response
 		// * golang multipart form data references: https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chat_id),
@@ -108,11 +108,11 @@ func main() {
 			}
 
 		}
-		// Don't forget to close the multipart writer.
-		// If you don't close it, your request will be missing the terminating boundary.
+		// * Don't forget to close the multipart writer.
+		// * If you don't close it, your request will be missing the terminating boundary.
 		w.Close()
 
-		// ~ send current photo to telegram
+		// * Send current photo to telegram
 		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", token)
 
 		req, _ := http.NewRequest("POST", url, &b)
