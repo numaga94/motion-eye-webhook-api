@@ -73,7 +73,7 @@ func main() {
 		// fmt.Println(resSnapshot)
 		// fmt.Println(string(bodySnapshot))
 
-		// ~ send current photo to telegram
+		// ~ Prepare multipart form data from snapshot response
 		// * golang multipart form data references: https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chat_id),
@@ -81,7 +81,6 @@ func main() {
 			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。", time.Now().Format(time.RFC3339))),
 		}
 
-		// Prepare a form that you will submit to that URL.
 		var b bytes.Buffer
 		w := multipart.NewWriter(&b)
 
@@ -113,6 +112,7 @@ func main() {
 		// If you don't close it, your request will be missing the terminating boundary.
 		w.Close()
 
+		// ~ send current photo to telegram
 		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", token)
 
 		req, _ := http.NewRequest("POST", url, &b)
