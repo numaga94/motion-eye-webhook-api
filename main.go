@@ -23,15 +23,29 @@ func main() {
 	// ~ Load env for config settings
 	var (
 		currentPath string
+		port        string
+		token       string
+		chatId      string
+		snapshotUrl string
+		switchUrl   string
 		err         error
 	)
 	if currentPath, err = os.Getwd(); err != nil {
-		currentPath = os.Args[1]
+		currentPath = os.Args[5]
 	}
 
 	if err := godotenv.Load(fmt.Sprintf("%v/.env", currentPath)); err != nil {
 		fmt.Println(err.Error(), currentPath)
-		log.Fatal(err.Error())
+		port = os.Args[1]
+		snapshotUrl = os.Args[2]
+		token = os.Args[3]
+		chatId = os.Args[4]
+	} else {
+		port = os.Getenv("PORT")
+		snapshotUrl = os.Getenv("SNAPSHOT_URL")
+		switchUrl = os.Getenv("SWITCH_URL")
+		chatId = os.Getenv("CHAT_ID")
+		token = os.Getenv("TOKEN")
 	}
 
 	// ~ Default middlewares
@@ -50,7 +64,7 @@ func main() {
 		}
 
 		// * get current photo
-		reqSnapshot, _ := http.NewRequest("GET", os.Getenv("SNAPSHOT_URL"), nil)
+		reqSnapshot, _ := http.NewRequest("GET", snapshotUrl, nil)
 
 		reqSnapshot.Header.Add("cookie", "motion_detected_1=false; monitor_info_1=; capture_fps_1=0.0")
 
@@ -68,9 +82,9 @@ func main() {
 		// * Prepare multipart form data from snapshot response
 		// * golang multipart form data references: https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
-			"chat_id": strings.NewReader(os.Getenv("CHAT_ID")),
+			"chat_id": strings.NewReader(chatId),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/off\n开启触发API: %v/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), os.Getenv("SWITCH_URL"), os.Getenv("SWITCH_URL"))),
+			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/off\n开启触发API: %v/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, switchUrl)),
 		}
 
 		var b bytes.Buffer
@@ -105,7 +119,7 @@ func main() {
 		w.Close()
 
 		// * Send current photo to telegram
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", os.Getenv("TOKEN"))
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", token)
 
 		req, _ := http.NewRequest("POST", url, &b)
 
@@ -138,5 +152,5 @@ func main() {
 		return c.JSON(fiber.Map{"status": fmt.Sprintf("SWITCH turned %v", params)})
 	})
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%v", os.Getenv("PORT"))))
+	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
 }
