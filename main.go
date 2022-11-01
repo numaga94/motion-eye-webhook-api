@@ -139,14 +139,11 @@ func main() {
 	})
 
 	// ~ api GET
-	app.Get("/switch/:status", func(c *fiber.Ctx) error {
+	app.Get("/switch/:status<bool>", func(c *fiber.Ctx) error {
 		params := strings.ToUpper(strings.TrimSpace(c.Params("status")))
-		switch params {
-		case "ON":
+		if params == "true" {
 			SWITCH = true
-		case "OFF":
-			SWITCH = false
-		default:
+		} else {
 			SWITCH = false
 		}
 
