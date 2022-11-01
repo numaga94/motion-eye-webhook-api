@@ -150,15 +150,18 @@ func main() {
 		}
 
 		status := strings.ToUpper(strings.TrimSpace(c.Query("status")))
+
+		var msg string
+
 		if status == "ON" {
 			SWITCH = true
-			status = "打开"
+			msg = "打开"
 		} else {
 			SWITCH = false
-			status = "关闭"
+			msg = "关闭"
 		}
 
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v\n%v办公室监控。", token, chatId, strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), status)
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v\n%v办公室监控。", token, chatId, strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), msg)
 
 		req, _ := http.NewRequest("GET", url, nil)
 
