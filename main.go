@@ -28,9 +28,9 @@ func main() {
 	if currentPath, err = os.Getwd(); err != nil {
 		currentPath = os.Args[1]
 	}
-	fmt.Println(currentPath)
+
 	if err := godotenv.Load(fmt.Sprintf("%v/.env", currentPath)); err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(err.Error(), currentPath)
 		log.Fatal(err.Error())
 	}
 
