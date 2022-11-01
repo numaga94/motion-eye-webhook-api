@@ -88,7 +88,7 @@ func main() {
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chatId),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/auth/%v/status/off\n开启触发API: %v/auth/%v/status/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
+			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v?key=%v&status=off\n开启触发API: %v?key=%v&status=on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
 		}
 
 		var b bytes.Buffer
@@ -142,14 +142,14 @@ func main() {
 	})
 
 	// ~ api GET
-	app.Get("/switch/auth/:key<len(20)>/status/:status", func(c *fiber.Ctx) error {
-		key := strings.TrimSpace(c.Params("key"))
+	app.Get("/switch", func(c *fiber.Ctx) error {
+		key := strings.TrimSpace(c.Query("key"))
 
 		if key != authKey {
 			return c.Status(401).JSON(fiber.Map{"message": "unauthorized"})
 		}
 
-		status := strings.ToUpper(strings.TrimSpace(c.Params("status")))
+		status := strings.ToUpper(strings.TrimSpace(c.Query("status")))
 		if status == "ON" {
 			SWITCH = true
 		} else {
