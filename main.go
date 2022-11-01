@@ -22,7 +22,9 @@ func main() {
 
 	// ~ Load env for config settings
 	CurrentPath, _ := os.Getwd()
-	godotenv.Load(fmt.Sprintf("%v/.env", CurrentPath))
+	if err := godotenv.Load(fmt.Sprintf("%v/.env", CurrentPath)); err != nil {
+		log.Fatal(err.Error())
+	}
 	// var (
 	// 	port         string
 	// 	snapshot_url string
