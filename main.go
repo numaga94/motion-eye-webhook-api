@@ -20,7 +20,6 @@ import (
 func main() {
 	app := fiber.New()
 
-	fmt.Println(os.Args)
 	// ~ Load env for config settings
 	var (
 		currentPath string
@@ -29,24 +28,24 @@ func main() {
 		chatId      string
 		snapshotUrl string
 		switchUrl   string
-		err         error
 	)
-	if currentPath, err = os.Getwd(); err != nil {
-		currentPath = os.Args[5]
-	}
 
-	if err := godotenv.Load(fmt.Sprintf("%v/.env", currentPath)); err != nil {
-		fmt.Println(err.Error(), currentPath)
-		port = os.Args[1]
-		snapshotUrl = os.Args[2]
-		token = os.Args[3]
-		chatId = os.Args[4]
+	// ? configs in production
+	if strings.ToLower(strings.TrimSpace(os.Args[1])) == "true" {
+		port = os.Args[2]
+		snapshotUrl = os.Args[3]
+		token = os.Args[4]
+		chatId = os.Args[5]
+		currentPath = os.Args[6]
 	} else {
+		// ? configs in development
+		godotenv.Load()
 		port = os.Getenv("PORT")
 		snapshotUrl = os.Getenv("SNAPSHOT_URL")
 		switchUrl = os.Getenv("SWITCH_URL")
 		chatId = os.Getenv("CHAT_ID")
 		token = os.Getenv("TOKEN")
+		currentPath, _ = os.Getwd()
 	}
 
 	fmt.Println(currentPath, port, token, chatId, snapshotUrl, switchUrl)
