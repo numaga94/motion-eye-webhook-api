@@ -173,7 +173,7 @@ func main() {
 		}
 		defer res.Body.Close()
 
-		return c.JSON(fiber.Map{"message": msg})
+		return c.JSON(fiber.Map{"message": "Okay"})
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
