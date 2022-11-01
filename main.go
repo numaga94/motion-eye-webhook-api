@@ -168,17 +168,12 @@ func main() {
 		req, _ := http.NewRequest("GET", url, nil)
 
 		res, err := http.DefaultClient.Do(req)
-		if err != nil {
+		if err != nil || res.Status != "200 OK" {
 			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
 		}
 		defer res.Body.Close()
 
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
-		}
-
-		return c.JSON(body)
+		return c.JSON(fiber.Map{"message": msg})
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
