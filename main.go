@@ -56,7 +56,7 @@ func main() {
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
-		File: "./favicon.ico",
+		File: "/home/office/motion-eye-webhook-api/favicon.ico",
 	}))
 
 	// ~ Variable to switch on/off the api
