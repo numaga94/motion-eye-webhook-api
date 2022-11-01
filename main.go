@@ -88,7 +88,7 @@ func main() {
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chatId),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/%v/off\n开启触发API: %v/%v/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
+			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/key/%v/status/off\n开启触发API: %v/key/%v/status/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
 		}
 
 		var b bytes.Buffer
@@ -142,7 +142,7 @@ func main() {
 	})
 
 	// ~ api GET
-	app.Get("/switch/:key<len(20)>/:status", func(c *fiber.Ctx) error {
+	app.Get("/switch/auth/:key<len(20)>/status/:status", func(c *fiber.Ctx) error {
 		key := strings.TrimSpace(c.Params("key"))
 
 		if key != authKey {
