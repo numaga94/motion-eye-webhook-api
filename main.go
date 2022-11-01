@@ -22,7 +22,9 @@ func main() {
 
 	// ~ Load env for config settings
 	CurrentPath, _ := os.Getwd()
+	fmt.Println(CurrentPath)
 	if err := godotenv.Load(fmt.Sprintf("%v/.env", CurrentPath)); err != nil {
+		fmt.Println(err.Error())
 		log.Fatal(err.Error())
 	}
 	// var (
