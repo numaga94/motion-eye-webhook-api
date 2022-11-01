@@ -28,6 +28,7 @@ func main() {
 		chatId      string
 		snapshotUrl string
 		switchUrl   string
+		authKey     string
 	)
 
 	// ? configs in production
@@ -38,6 +39,7 @@ func main() {
 		chatId = os.Args[5]
 		currentPath = os.Args[6]
 		switchUrl = os.Args[7]
+		authKey = os.Args[8]
 	} else {
 		// ? configs in development
 		godotenv.Load()
@@ -46,6 +48,7 @@ func main() {
 		switchUrl = os.Getenv("SWITCH_URL")
 		chatId = os.Getenv("CHAT_ID")
 		token = os.Getenv("TOKEN")
+		authKey = os.Getenv("AUTH_KEY")
 		currentPath, _ = os.Getwd()
 	}
 
@@ -85,7 +88,7 @@ func main() {
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chatId),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/off\n开启触发API: %v/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, switchUrl)),
+			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/%v/off\n开启触发API: %v/%v/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
 		}
 
 		var b bytes.Buffer
@@ -139,15 +142,21 @@ func main() {
 	})
 
 	// ~ api GET
-	app.Get("/switch/:status", func(c *fiber.Ctx) error {
-		params := strings.ToUpper(strings.TrimSpace(c.Params("status")))
-		if params == "ON" {
+	app.Get("/switch/:key<len(20)>/:status", func(c *fiber.Ctx) error {
+		key := strings.TrimSpace(c.Params("key"))
+
+		if key != authKey {
+			return c.Status(401).JSON(fiber.Map{"message": "unauthorized"})
+		}
+
+		status := strings.ToUpper(strings.TrimSpace(c.Params("status")))
+		if status == "ON" {
 			SWITCH = true
 		} else {
 			SWITCH = false
 		}
 
-		return c.JSON(fiber.Map{"status": fmt.Sprintf("SWITCH turned %v", params)})
+		return c.JSON(fiber.Map{"status": fmt.Sprintf("SWITCH turned %v", status)})
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
