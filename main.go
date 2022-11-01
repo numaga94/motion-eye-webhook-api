@@ -20,6 +20,7 @@ import (
 func main() {
 	app := fiber.New()
 
+	fmt.Println(os.Args)
 	// ~ Load env for config settings
 	var (
 		currentPath string
