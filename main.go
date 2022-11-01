@@ -49,6 +49,8 @@ func main() {
 		token = os.Getenv("TOKEN")
 	}
 
+	fmt.Println(currentPath, port, token, chatId, snapshotUrl, switchUrl)
+
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
