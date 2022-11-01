@@ -89,7 +89,7 @@ func main() {
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chatId),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 发现办公室有物体正在移动中。\n关闭监控通知: %v?key=%v&status=off\n打开监控通知: %v?key=%v&status=on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
+			"caption": strings.NewReader(fmt.Sprintf("%v 发现办公室有物体正在移动中。\n《关闭》监控通知: %v?key=%v&status=off\n《打开》监控通知: %v?key=%v&status=on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
 		}
 
 		var b bytes.Buffer
