@@ -7,6 +7,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -152,16 +153,17 @@ func main() {
 		status := strings.ToUpper(strings.TrimSpace(c.Query("status")))
 
 		var msg string
+		currentTime := strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1)
 
 		if status == "ON" {
 			SWITCH = true
-			msg = "打开"
+			msg = url.QueryEscape(fmt.Sprintf("%v\n《已打开》办公室监控。", currentTime))
 		} else {
 			SWITCH = false
-			msg = "关闭"
+			msg = url.QueryEscape(fmt.Sprintf("%v\n《已关闭》办公室监控。", currentTime))
 		}
 
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v\n%v办公室监控。", token, chatId, strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), msg)
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v", token, chatId, msg)
 
 		req, _ := http.NewRequest("GET", url, nil)
 
