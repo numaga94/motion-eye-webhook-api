@@ -21,42 +21,43 @@ func main() {
 	app := fiber.New()
 
 	// ~ Load env for config settings
-	godotenv.Load()
-	var (
-		port         string
-		snapshot_url string
-		token        string
-		chat_id      string
-	)
+	CurrentPath, _ := os.Getwd()
+	godotenv.Load(fmt.Sprintf("%v/.env", CurrentPath))
+	// var (
+	// 	port         string
+	// 	snapshot_url string
+	// 	token        string
+	// 	chat_id      string
+	// )
 
-	if os.Getenv("PORT") == "" {
-		port = os.Args[1]
-	} else {
-		port = os.Getenv("PORT")
-	}
+	// if os.Getenv("PORT") == "" {
+	// 	port = os.Args[1]
+	// } else {
+	// 	port = os.Getenv("PORT")
+	// }
 
-	if os.Getenv("SNAPSHOT_URL") == "" {
-		snapshot_url = os.Args[2]
-	} else {
-		snapshot_url = os.Getenv("SNAPSHOT_URL")
-	}
+	// if os.Getenv("SNAPSHOT_URL") == "" {
+	// 	snapshot_url = os.Args[2]
+	// } else {
+	// 	snapshot_url = os.Getenv("SNAPSHOT_URL")
+	// }
 
-	if os.Getenv("TOKEN") == "" {
-		token = os.Args[3]
-	} else {
-		token = os.Getenv("TOKEN")
-	}
+	// if os.Getenv("TOKEN") == "" {
+	// 	token = os.Args[3]
+	// } else {
+	// 	token = os.Getenv("TOKEN")
+	// }
 
-	if os.Getenv("CHAT_ID") == "" {
-		chat_id = os.Args[4]
-	} else {
-		chat_id = os.Getenv("CHAT_ID")
-	}
+	// if os.Getenv("CHAT_ID") == "" {
+	// 	chat_id = os.Args[4]
+	// } else {
+	// 	chat_id = os.Getenv("CHAT_ID")
+	// }
 
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
-		File: "/home/office/motion-eye-webhook-api/favicon.ico",
+		File: fmt.Sprintf("%v/favicon.ico", CurrentPath),
 	}))
 
 	// ~ Variable to switch on/off the api
@@ -69,7 +70,7 @@ func main() {
 		}
 
 		// * get current photo
-		reqSnapshot, _ := http.NewRequest("GET", snapshot_url, nil)
+		reqSnapshot, _ := http.NewRequest("GET", os.Getenv("SNAPSHOT_URL"), nil)
 
 		reqSnapshot.Header.Add("cookie", "motion_detected_1=false; monitor_info_1=; capture_fps_1=0.0")
 
@@ -87,9 +88,9 @@ func main() {
 		// * Prepare multipart form data from snapshot response
 		// * golang multipart form data references: https://stackoverflow.com/questions/20205796/post-data-using-the-content-type-multipart-form-data
 		values := map[string]io.Reader{
-			"chat_id": strings.NewReader(chat_id),
+			"chat_id": strings.NewReader(os.Getenv("CHAT_ID")),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: http://10.0.0.40:4000/switch/off\n开启触发API: http://10.0.0.40:4000/switch/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1))),
+			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。\n关闭触发API: %v/off\n开启触发API: %v/on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), os.Getenv("SWITCH_URL"), os.Getenv("SWITCH_URL"))),
 		}
 
 		var b bytes.Buffer
@@ -124,7 +125,7 @@ func main() {
 		w.Close()
 
 		// * Send current photo to telegram
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", token)
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", os.Getenv("TOKEN"))
 
 		req, _ := http.NewRequest("POST", url, &b)
 
@@ -157,5 +158,5 @@ func main() {
 		return c.JSON(fiber.Map{"status": fmt.Sprintf("SWITCH turned %v", params)})
 	})
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
+	log.Fatal(app.Listen(fmt.Sprintf(":%v", os.Getenv("PORT"))))
 }
