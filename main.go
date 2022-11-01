@@ -57,7 +57,7 @@ func main() {
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
-		File: fmt.Sprintf("%v/favicon.ico", CurrentPath),
+		File: fmt.Sprintf("%v/favicon/favicon.ico", CurrentPath),
 	}))
 
 	// ~ Variable to switch on/off the api
