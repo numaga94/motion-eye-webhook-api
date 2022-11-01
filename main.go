@@ -21,47 +21,23 @@ func main() {
 	app := fiber.New()
 
 	// ~ Load env for config settings
-	CurrentPath, _ := os.Getwd()
-	fmt.Println(CurrentPath)
-	if err := godotenv.Load(fmt.Sprintf("%v/.env", CurrentPath)); err != nil {
+	var (
+		currentPath string
+		err         error
+	)
+	if currentPath, err = os.Getwd(); err != nil {
+		currentPath = os.Args[1]
+	}
+	fmt.Println(currentPath)
+	if err := godotenv.Load(fmt.Sprintf("%v/.env", currentPath)); err != nil {
 		fmt.Println(err.Error())
 		log.Fatal(err.Error())
 	}
-	// var (
-	// 	port         string
-	// 	snapshot_url string
-	// 	token        string
-	// 	chat_id      string
-	// )
-
-	// if os.Getenv("PORT") == "" {
-	// 	port = os.Args[1]
-	// } else {
-	// 	port = os.Getenv("PORT")
-	// }
-
-	// if os.Getenv("SNAPSHOT_URL") == "" {
-	// 	snapshot_url = os.Args[2]
-	// } else {
-	// 	snapshot_url = os.Getenv("SNAPSHOT_URL")
-	// }
-
-	// if os.Getenv("TOKEN") == "" {
-	// 	token = os.Args[3]
-	// } else {
-	// 	token = os.Getenv("TOKEN")
-	// }
-
-	// if os.Getenv("CHAT_ID") == "" {
-	// 	chat_id = os.Args[4]
-	// } else {
-	// 	chat_id = os.Getenv("CHAT_ID")
-	// }
 
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
-		File: fmt.Sprintf("%v/favicon/favicon.ico", CurrentPath),
+		File: fmt.Sprintf("%v/favicon/favicon.ico", currentPath),
 	}))
 
 	// ~ Variable to switch on/off the api
