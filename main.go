@@ -37,6 +37,7 @@ func main() {
 		token = os.Args[4]
 		chatId = os.Args[5]
 		currentPath = os.Args[6]
+		switchUrl = os.Args[7]
 	} else {
 		// ? configs in development
 		godotenv.Load()
@@ -48,15 +49,13 @@ func main() {
 		currentPath, _ = os.Getwd()
 	}
 
-	fmt.Println(currentPath, port, token, chatId, snapshotUrl, switchUrl)
-
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
 		File: fmt.Sprintf("%v/favicon/favicon.ico", currentPath),
 	}))
 
-	// ~ Variable to switch on/off the api
+	// ~ Set default switch on/off the api to "ON"
 	var SWITCH bool = true
 
 	// ~ api GET
