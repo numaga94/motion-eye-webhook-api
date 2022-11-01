@@ -58,12 +58,12 @@ func main() {
 		File: fmt.Sprintf("%v/favicon/favicon.ico", currentPath),
 	}))
 
-	// ~ Set default switch on/off the api to "打开"
-	var SWITCH string = "打开"
+	// ~ Set default switch on/off the api to "ON"
+	var SWITCH bool = true
 
 	// ~ api GET
 	app.Get("/", func(c *fiber.Ctx) error {
-		if SWITCH != "打开" {
+		if !SWITCH {
 			return c.Status(400).JSON(fiber.Map{"message": "SWITCH is OFF"})
 		}
 
@@ -151,12 +151,14 @@ func main() {
 
 		status := strings.ToUpper(strings.TrimSpace(c.Query("status")))
 		if status == "ON" {
-			SWITCH = "打开"
+			SWITCH = true
+			status = "打开"
 		} else {
-			SWITCH = "关闭"
+			SWITCH = false
+			status = "关闭"
 		}
 
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v\n%v办公室监控。", token, chatId, strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), SWITCH)
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v\n%v办公室监控。", token, chatId, strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), status)
 
 		req, _ := http.NewRequest("GET", url, nil)
 
