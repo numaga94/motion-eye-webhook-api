@@ -55,8 +55,15 @@ func main() {
 	// ~ Default middlewares
 	app.Use(logger.New())
 
+	// ~ Variable to switch on/off the api
+	var SWITCH bool = true
+
 	// ~ api GET
 	app.Get("/", func(c *fiber.Ctx) error {
+		if !SWITCH {
+			return c.Status(400).JSON(fiber.Map{"message": "SWITCH is OFF"})
+		}
+
 		// * get current photo
 		reqSnapshot, _ := http.NewRequest("GET", snapshot_url, nil)
 
@@ -78,7 +85,7 @@ func main() {
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chat_id),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 办公室发现异动。", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1))),
+			"caption": strings.NewReader(fmt.Sprintf("%v\n办公室发现异动。\n关闭触发API: http://10.0.0.70:4000/switch/off\n开启触发API: http://10.0.0.70:4000/switch/off", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1))),
 		}
 
 		var b bytes.Buffer
@@ -129,6 +136,21 @@ func main() {
 
 		// fmt.Println(string(body))
 		return c.JSON(body)
+	})
+
+	// ~ api GET
+	app.Get("/switch/:status", func(c *fiber.Ctx) error {
+		params := strings.ToUpper(strings.TrimSpace(c.Params("status")))
+		switch params {
+		case "ON":
+			SWITCH = true
+		case "OFF":
+			SWITCH = false
+		default:
+			SWITCH = false
+		}
+
+		return c.JSON(fiber.Map{"status": fmt.Sprintf("SWITCH turned %v", params)})
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
