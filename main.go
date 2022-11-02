@@ -89,7 +89,7 @@ func main() {
 		values := map[string]io.Reader{
 			"chat_id": strings.NewReader(chatId),
 			"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-			"caption": strings.NewReader(fmt.Sprintf("%v 发现办公室有物体正在移动中。\n《关闭》监控通知: %v?key=%v&status=off\n《打开》监控通知: %v?key=%v&status=on", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey, switchUrl, authKey)),
+			"caption": strings.NewReader(fmt.Sprintf("%v 发现办公室有人或物正在移动。\n《关闭》监控通知: %v?key=%v&status=off", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey)),
 		}
 
 		var b bytes.Buffer
@@ -157,10 +157,10 @@ func main() {
 
 		if status == "ON" {
 			SWITCH = true
-			msg = url.QueryEscape(fmt.Sprintf("%v\n《已打开》办公室监控。\n当你本人在办公室的时候，可以关闭监控通知。", currentTime))
+			msg = url.QueryEscape(fmt.Sprintf("%v\n《已打开》办公室监控。\n当你本人在办公室的时候，可以关闭监控通知。\n《关闭》监控通知: %v?key=%v&status=off", currentTime, switchUrl, authKey))
 		} else {
 			SWITCH = false
-			msg = url.QueryEscape(fmt.Sprintf("%v\n《已关闭》办公室监控。\n当你离开办公室的时候，请不要忘记打开监控通知。", currentTime))
+			msg = url.QueryEscape(fmt.Sprintf("%v\n《已关闭》办公室监控。\n当你离开办公室的时候，请不要忘记打开监控通知。\n《打开》监控通知: %v?key=%v&status=on", currentTime, switchUrl, authKey))
 		}
 
 		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v", token, chatId, msg)
