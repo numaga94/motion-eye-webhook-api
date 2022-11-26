@@ -118,7 +118,7 @@ func main() {
 		defer res.Body.Close()
 		body, _ := io.ReadAll(res.Body)
 
-		fmt.Printf("%v 发现办公室有人或物正在移动。", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1))
+		fmt.Printf("%v 发现办公室有人或物正在移动。\n", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1))
 		fmt.Fprintln(w, string(body))
 	})
 
