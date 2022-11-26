@@ -46,6 +46,7 @@ func main() {
 
 		if !SWITCH && isInOfficeHour(openHour, endHour) {
 			http.Error(w, "SWITCH is OFF", http.StatusBadRequest)
+			return
 		}
 
 		// * get current photo
