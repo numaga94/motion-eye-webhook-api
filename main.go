@@ -32,7 +32,13 @@ func main() {
 	chatId := os.Getenv("CHAT_ID")
 	token := os.Getenv("TOKEN")
 	authKey := os.Getenv("AUTH_KEY")
-	currentPath, _ := os.Getwd()
+	var (
+		currentPath string
+		err         error
+	)
+	if currentPath, err = os.Getwd(); err != nil {
+		currentPath = os.Getenv("CURRENT_PATH")
+	}
 
 	fmt.Println(currentPath)
 
