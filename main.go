@@ -34,6 +34,8 @@ func main() {
 	authKey := os.Getenv("AUTH_KEY")
 	currentPath, _ := os.Getwd()
 
+	fmt.Println(currentPath)
+
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
