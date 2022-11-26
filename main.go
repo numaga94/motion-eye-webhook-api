@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,8 +32,8 @@ func main() {
 	chatId := os.Getenv("CHAT_ID")
 	token := os.Getenv("TOKEN")
 	authKey := os.Getenv("AUTH_KEY")
-
-	fmt.Println(port, snapshotUrl, switchUrl, chatId, token, authKey)
+	openHour, _ := strconv.Atoi(os.Getenv("OPEN_HOUR"))
+	endHour, _ := strconv.Atoi(os.Getenv("END_HOUR"))
 
 	// ~ Default middlewares
 	app.Use(logger.New())
@@ -42,7 +43,16 @@ func main() {
 
 	// ~ api GET
 	app.Get("/", func(c *fiber.Ctx) error {
-		if !SWITCH {
+		isInOfficeHour := func(openHour int, endHour int) bool {
+			currentHour := time.Now().Hour()
+			if openHour <= currentHour && currentHour <= endHour {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		if !SWITCH && !isInOfficeHour(openHour, endHour) {
 			return c.Status(400).JSON(fiber.Map{"message": "SWITCH is OFF"})
 		}
 
