@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
@@ -35,9 +34,6 @@ func main() {
 
 	// ~ Default middlewares
 	app.Use(logger.New())
-	app.Use(favicon.New(favicon.Config{
-		File: "./favicon.ico",
-	}))
 
 	// ~ Set default switch on/off the api to "ON"
 	var SWITCH bool = true
