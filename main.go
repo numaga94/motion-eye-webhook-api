@@ -32,6 +32,8 @@ func main() {
 	token := os.Getenv("TOKEN")
 	authKey := os.Getenv("AUTH_KEY")
 
+	fmt.Println(port, snapshotUrl, switchUrl, chatId, token, authKey)
+
 	// ~ Default middlewares
 	app.Use(logger.New())
 
