@@ -45,6 +45,7 @@ func main() {
 		}
 
 		if !SWITCH && isInOfficeHour(openHour, endHour) {
+			fmt.Println("400 Bad request => SWITCH is OFF")
 			http.Error(w, "SWITCH is OFF", http.StatusBadRequest)
 			return
 		}
@@ -119,7 +120,7 @@ func main() {
 		defer res.Body.Close()
 		body, _ := io.ReadAll(res.Body)
 
-		fmt.Printf("%v 发现办公室有人或物正在移动。\n", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1))
+		fmt.Println("200 Okay => moving object detected in office")
 		fmt.Fprintln(w, string(body))
 	})
 
@@ -154,7 +155,7 @@ func main() {
 		}
 		defer res.Body.Close()
 
-		fmt.Println("Okay -> switch", SWITCH)
+		fmt.Println("200 Okay => switch", SWITCH)
 		fmt.Fprintln(w, "Okay")
 	})
 
