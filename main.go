@@ -52,7 +52,7 @@ func main() {
 			}
 		}
 
-		if !SWITCH && !isInOfficeHour(openHour, endHour) {
+		if !SWITCH && isInOfficeHour(openHour, endHour) {
 			return c.Status(400).JSON(fiber.Map{"message": "SWITCH is OFF"})
 		}
 
