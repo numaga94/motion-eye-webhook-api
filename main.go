@@ -32,20 +32,11 @@ func main() {
 	chatId := os.Getenv("CHAT_ID")
 	token := os.Getenv("TOKEN")
 	authKey := os.Getenv("AUTH_KEY")
-	var (
-		currentPath string
-		err         error
-	)
-	if currentPath, err = os.Getwd(); err != nil {
-		currentPath = os.Getenv("CURRENT_PATH")
-	}
-
-	fmt.Println(currentPath)
 
 	// ~ Default middlewares
 	app.Use(logger.New())
 	app.Use(favicon.New(favicon.Config{
-		File: fmt.Sprintf("%v/favicon/favicon.ico", currentPath),
+		File: "./favicon.ico",
 	}))
 
 	// ~ Set default switch on/off the api to "ON"
