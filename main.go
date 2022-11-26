@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -13,14 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	app := fiber.New()
-
 	// ~ Load env for config settings
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("loading env failed")
@@ -35,14 +30,11 @@ func main() {
 	openHour, _ := strconv.Atoi(os.Getenv("OPEN_HOUR"))
 	endHour, _ := strconv.Atoi(os.Getenv("END_HOUR"))
 
-	// ~ Default middlewares
-	app.Use(logger.New())
-
 	// ~ Set default switch on/off the api to "ON"
 	var SWITCH bool = true
 
 	// ~ api GET
-	app.Get("/", func(c *fiber.Ctx) error {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		isInOfficeHour := func(openHour int, endHour int) bool {
 			currentHour := time.Now().Hour()
 			if openHour <= currentHour && currentHour <= endHour {
@@ -53,7 +45,7 @@ func main() {
 		}
 
 		if !SWITCH && isInOfficeHour(openHour, endHour) {
-			return c.Status(400).JSON(fiber.Map{"message": "SWITCH is OFF"})
+			http.Error(w, "SWITCH is OFF", http.StatusBadRequest)
 		}
 
 		// * get current photo
@@ -63,7 +55,7 @@ func main() {
 
 		resSnapshot, err := http.DefaultClient.Do(reqSnapshot)
 		if err != nil {
-			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
 		defer resSnapshot.Body.Close()
@@ -81,7 +73,7 @@ func main() {
 		}
 
 		var b bytes.Buffer
-		w := multipart.NewWriter(&b)
+		bw := multipart.NewWriter(&b)
 
 		for key, r := range values {
 			var (
@@ -93,12 +85,12 @@ func main() {
 			}
 			// Add an image file
 			if key == "photo" {
-				if fw, err = w.CreateFormFile(key, "photo"); err != nil {
+				if fw, err = bw.CreateFormFile(key, "photo"); err != nil {
 					fmt.Println(err.Error())
 				}
 			} else {
 				// Add other fields
-				if fw, err = w.CreateFormField(key); err != nil {
+				if fw, err = bw.CreateFormField(key); err != nil {
 					fmt.Println(err.Error())
 				}
 			}
@@ -109,36 +101,36 @@ func main() {
 		}
 		// * Don't forget to close the multipart writer.
 		// * If you don't close it, your request will be missing the terminating boundary.
-		w.Close()
+		bw.Close()
 
 		// * Send current photo to telegram
 		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendPhoto", token)
 
 		req, _ := http.NewRequest("POST", url, &b)
 
-		req.Header.Add("Content-Type", w.FormDataContentType())
+		req.Header.Add("Content-Type", bw.FormDataContentType())
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
 		defer res.Body.Close()
 		body, _ := io.ReadAll(res.Body)
 
-		// fmt.Println(string(body))
-		return c.JSON(body)
+		fmt.Println(body)
+		fmt.Fprintln(w, string(body))
 	})
 
-	// ~ api GET
-	app.Get("/switch", func(c *fiber.Ctx) error {
-		key := strings.TrimSpace(c.Query("key"))
+	// ~ api GET to control switch ON/OFF
+	http.HandleFunc("/switch", func(w http.ResponseWriter, r *http.Request) {
+		key := strings.TrimSpace(r.URL.Query().Get("key"))
 
 		if key != authKey {
-			return c.Status(401).JSON(fiber.Map{"message": "unauthorized"})
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
 		}
 
-		status := strings.ToUpper(strings.TrimSpace(c.Query("status")))
+		status := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("status")))
 
 		var msg string
 		currentTime := strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1)
@@ -157,12 +149,14 @@ func main() {
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil || res.Status != "200 OK" {
-			return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 		defer res.Body.Close()
 
-		return c.JSON(fiber.Map{"message": "Okay"})
+		fmt.Println("Okay -> switch", SWITCH)
+		fmt.Fprintln(w, "Okay")
 	})
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
+	fmt.Println("http server is listening on port", port)
+	http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 }
