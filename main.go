@@ -22,36 +22,17 @@ func main() {
 	app := fiber.New()
 
 	// ~ Load env for config settings
-	var (
-		currentPath string
-		port        string
-		token       string
-		chatId      string
-		snapshotUrl string
-		switchUrl   string
-		authKey     string
-	)
-
-	// ? configs in production
-	if strings.ToLower(strings.TrimSpace(os.Args[1])) == "true" {
-		port = os.Args[2]
-		snapshotUrl = os.Args[3]
-		token = os.Args[4]
-		chatId = os.Args[5]
-		currentPath = os.Args[6]
-		switchUrl = os.Args[7]
-		authKey = os.Args[8]
-	} else {
-		// ? configs in development
-		godotenv.Load()
-		port = os.Getenv("PORT")
-		snapshotUrl = os.Getenv("SNAPSHOT_URL")
-		switchUrl = os.Getenv("SWITCH_URL")
-		chatId = os.Getenv("CHAT_ID")
-		token = os.Getenv("TOKEN")
-		authKey = os.Getenv("AUTH_KEY")
-		currentPath, _ = os.Getwd()
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("loading env failed")
 	}
+
+	port := os.Getenv("PORT")
+	snapshotUrl := os.Getenv("SNAPSHOT_URL")
+	switchUrl := os.Getenv("SWITCH_URL")
+	chatId := os.Getenv("CHAT_ID")
+	token := os.Getenv("TOKEN")
+	authKey := os.Getenv("AUTH_KEY")
+	currentPath, _ := os.Getwd()
 
 	// ~ Default middlewares
 	app.Use(logger.New())
