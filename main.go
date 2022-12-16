@@ -33,17 +33,13 @@ func main() {
 	// ~ Set default switch on/off the api to "ON"
 	var SWITCH bool = true
 
-	// ~ api GET to control switch ON/OFF
-	// http.HandleFunc("/switch", func(w http.ResponseWriter, r *http.Request) {
-	// })
-
 	// ~ api GET
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		key := strings.TrimSpace(r.URL.Query().Get("key"))
 		status := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("status")))
 
+		// SWITCH ON/OFF TELEGRAM NOTIFICATION ENDPOINT FOR CAMERA
 		if key != "" && status != "" {
-
 			if key != authKey {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 			}
@@ -71,9 +67,8 @@ func main() {
 
 			fmt.Println("200 Okay => switch", SWITCH)
 			fmt.Fprintln(w, "Okay")
-
 		} else {
-
+			// MOTION DETECTED
 			isInOfficeHour := func(openHour int, endHour int) bool {
 				currentHour := time.Now().Hour()
 				if openHour <= currentHour && currentHour <= endHour {
