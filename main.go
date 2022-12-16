@@ -33,6 +33,41 @@ func main() {
 	// ~ Set default switch on/off the api to "ON"
 	var SWITCH bool = true
 
+	// ~ api GET to control switch ON/OFF
+	http.HandleFunc("/switch", func(w http.ResponseWriter, r *http.Request) {
+		key := strings.TrimSpace(r.URL.Query().Get("key"))
+
+		if key != authKey {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+		}
+
+		status := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("status")))
+
+		var msg string
+		currentTime := strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1)
+
+		if status == "ON" {
+			SWITCH = true
+			msg = url.QueryEscape(fmt.Sprintf("%v\n《已打开》办公室监控。\n当你本人在办公室的时候，可以关闭监控通知。\n《关闭》监控通知: %v?key=%v&status=off", currentTime, switchUrl, authKey))
+		} else {
+			SWITCH = false
+			msg = url.QueryEscape(fmt.Sprintf("%v\n《已关闭》办公室监控。\n当你离开办公室的时候，请不要忘记打开监控通知。\n《打开》监控通知: %v?key=%v&status=on", currentTime, switchUrl, authKey))
+		}
+
+		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v", token, chatId, msg)
+
+		req, _ := http.NewRequest("GET", url, nil)
+
+		res, err := http.DefaultClient.Do(req)
+		if err != nil || res.Status != "200 OK" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		defer res.Body.Close()
+
+		fmt.Println("200 Okay => switch", SWITCH)
+		fmt.Fprintln(w, "Okay")
+	})
+
 	// ~ api GET
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		isInOfficeHour := func(openHour int, endHour int) bool {
@@ -122,41 +157,6 @@ func main() {
 
 		fmt.Println("200 Okay => moving object detected in office")
 		fmt.Fprintln(w, string(body))
-	})
-
-	// ~ api GET to control switch ON/OFF
-	http.HandleFunc("/switch", func(w http.ResponseWriter, r *http.Request) {
-		key := strings.TrimSpace(r.URL.Query().Get("key"))
-
-		if key != authKey {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
-		}
-
-		status := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("status")))
-
-		var msg string
-		currentTime := strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1)
-
-		if status == "ON" {
-			SWITCH = true
-			msg = url.QueryEscape(fmt.Sprintf("%v\n《已打开》办公室监控。\n当你本人在办公室的时候，可以关闭监控通知。\n《关闭》监控通知: %v?key=%v&status=off", currentTime, switchUrl, authKey))
-		} else {
-			SWITCH = false
-			msg = url.QueryEscape(fmt.Sprintf("%v\n《已关闭》办公室监控。\n当你离开办公室的时候，请不要忘记打开监控通知。\n《打开》监控通知: %v?key=%v&status=on", currentTime, switchUrl, authKey))
-		}
-
-		url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage?chat_id=%v&text=%v", token, chatId, msg)
-
-		req, _ := http.NewRequest("GET", url, nil)
-
-		res, err := http.DefaultClient.Do(req)
-		if err != nil || res.Status != "200 OK" {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-		defer res.Body.Close()
-
-		fmt.Println("200 Okay => switch", SWITCH)
-		fmt.Fprintln(w, "Okay")
 	})
 
 	fmt.Println("http server is listening on port", port)
