@@ -24,6 +24,7 @@ func main() {
 	port := os.Getenv("PORT")
 	snapshotUrl := os.Getenv("SNAPSHOT_URL")
 	switchUrl := os.Getenv("SWITCH_URL")
+	streamingUrl := os.Getenv("STREAMING_URL")
 	chatId := os.Getenv("CHAT_ID")
 	token := os.Getenv("TOKEN")
 	authKey := os.Getenv("AUTH_KEY")
@@ -105,7 +106,7 @@ func main() {
 			values := map[string]io.Reader{
 				"chat_id": strings.NewReader(chatId),
 				"photo":   strings.NewReader(string(bodySnapshot)), // lets assume its this file
-				"caption": strings.NewReader(fmt.Sprintf("%v 发现办公室有人或物正在移动。\n《关闭》监控通知: %v?key=%v&status=off", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), switchUrl, authKey)),
+				"caption": strings.NewReader(fmt.Sprintf("%v 发现办公室有人或物正在移动。\n查看办公室实时画面: %v\n《关闭》监控通知: %v?key=%v&status=off", strings.Replace(time.Now().Format(time.RFC3339), "T", " ", 1), streamingUrl, switchUrl, authKey)),
 			}
 
 			var b bytes.Buffer
